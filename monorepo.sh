@@ -26,8 +26,13 @@ pnpm exec husky add .husky/pre-commit 'pnpm exec lint-staged'
 cat > commitlint.config.js <<EOF
 module.exports = {
     extends: ["@commitlint/config-conventional"],
-    rules: []
+    rules: {}
 }
+EOF
+cat > .eslintignore <<EOF
+node_modules
+.eslintrc.js
+commitlint.config.js
 EOF
 touch .npmrc .nvmrc
 mkdir -p packages
