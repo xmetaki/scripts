@@ -15,14 +15,16 @@ cat > pnpm-workspace.yaml <<EOF
 packages:
   - packages/*
 EOF
-pnpm add json husky @commitlint/{config-conventional,cli} lint-staged -w -D
+pnpm add commitizen cz-conventional-changelog standard-version json husky @commitlint/{config-conventional,cli} lint-staged -w -D
 pnpm exec json -I -f package.json -e 'this.private = true'
 pnpm exec json -I -f package.json -e 'this.scripts["prepare"] = "husky install"'
+pnpm exec json -I -f package.json -e 'this.scripts["release"] = "standard-version"'
+pnpm exec json -I -f package.json -e 'this.scripts["commit"] = "pnpm exec git cz"'
 pnpm exec json -I -f package.json -e 'this["lint-staged"] = {"*.{ts,tsx,js,vue}": "pnpm exec eslint --fix"}'
 pnpm run prepare
 pnpm exec husky add .husky/commit-msg 'pnpm exec commitlint --edit "$1"'
 pnpm exec husky add .husky/pre-commit 'pnpm exec lint-staged'
-
+echo '{"path": "cz-conventional-changelog"}' > .czrc
 cat > commitlint.config.js <<EOF
 module.exports = {
     extends: ["@commitlint/config-conventional"],
