@@ -10,6 +10,7 @@ monorepo.sh
 EOF
 #初始化项目
 pnpm init
+pnpm add typescript
 pnpm create @eslint/config
 cat > pnpm-workspace.yaml <<EOF
 packages:
