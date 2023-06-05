@@ -38,3 +38,11 @@ commitlint.config.js
 EOF
 touch .npmrc .nvmrc
 mkdir -p packages
+cat > .editorconfig <<EOF
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+indent_size = 4
+EOF
