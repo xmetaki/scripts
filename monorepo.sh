@@ -10,7 +10,7 @@ monorepo.sh
 EOF
 #初始化项目
 pnpm init
-pnpm add typescript
+pnpm add typescript@5.0.2
 pnpm create @eslint/config
 cat > pnpm-workspace.yaml <<EOF
 packages:
@@ -23,6 +23,7 @@ pnpm exec json -I -f package.json -e 'this.private = true'
 pnpm exec json -I -f package.json -e 'this.scripts["prepare"] = "husky install"'
 pnpm exec json -I -f package.json -e 'this.scripts["release"] = "standard-version"'
 pnpm exec json -I -f package.json -e 'this.scripts["commit"] = "pnpm exec git cz"'
+pnpm exec json -I -f package.json -e 'this["engines"] = {"node": ">= 16"}'
 pnpm exec json -I -f package.json -e 'this["lint-staged"] = {"*.{ts,tsx,js,vue}": "pnpm exec eslint --fix"}'
 pnpm run prepare
 pnpm exec husky add .husky/commit-msg 'pnpm exec commitlint --edit "$1"'
@@ -43,7 +44,7 @@ const defaultScope = execSync('git status --porcelain || true')
 .toString()
 .trim()
 .split('\n')
-.find((r) => r.indexOf('M  ') >= 0)
+.find((r) => /M\s+packages/.test(r))
 ?.replace(/(\/)/g, '%')
 ?.match(/packages%((\w|-)*)/)?.[1];
 module.exports = {
@@ -54,19 +55,19 @@ module.exports = {
 		{ value: 'refactor', name: 'refactor: 代码重构' },
 		{ value: 'release',  name: 'release:  发布' },
 		{ value: 'deploy',   name: 'deploy:   部署' },
-        { value: 'ci',       name: 'ci:       持续集成'},
+                { value: 'ci',       name: 'ci:       持续集成'},
 		{ value: 'docs',     name: 'docs:     修改文档' },
 		{ value: 'test',     name: 'test:     单元测试' },
 		{ value: 'chore',    name: 'chore:    更改配置文件' },
 		{ value: 'style',    name: 'style:    样式修改不影响逻辑' },
 		{ value: 'revert',   name: 'revert:   版本回退' },
 		{ value: 'depend',   name: 'depend:   依赖调整' },
-		{ value: 'minus',    name: 'minus:    版本回退' },
-		{ value: 'del',      name: 'del:      删除代码/文件' }
+		{ value: 'perf',     name: 'perf:     性能优化' },
+		{ value: 'build',    name: 'build:    打包构建'}
 	],
 	scopes: [
 		...packages,
-    'project'
+                'project'
 	],
 	messages: {
 		type: '选择更改类型:\n',
@@ -97,21 +98,21 @@ module.exports = {
 			2,
 			'always',
 			[
-        'init',
-        'feat',
-        'fix',
-        'refactor',
-        'release',
-        'deploy',
-        'ci',
-        'docs',
-        'test',
-        'chore',
-        'style',
-        'revert',
-        'depend',
-        'minus',
-        'del'
+				'init',
+				'feat',
+				'fix',
+				'refactor',
+				'release',
+				'deploy',
+				'ci',
+				'docs',
+				'test',
+				'chore',
+				'style',
+				'revert',
+				'depend',
+				"perf",
+				"build"
 			]
 		],
 		// <type> 不能为空
@@ -149,6 +150,28 @@ cat > .eslintignore <<EOF
 node_modules
 .eslintrc.js
 commitlint.config.js
+EOF
+
+cat > .versionrc.js <<EOF
+module.exports = {
+    "types": [
+        { "type": "init",      "section": "😶‍🌫️ Init | 初始化" },
+        { "type": "feat",      "section": "✨ Features | 新功能" },
+        { "type": "fix",       "section": "⛅ Bug Fixes | 漏洞修复" },
+        { "type": "refactor",  "section": "😤 Code Refactoring | 代码重构" },
+        { "type": "release",   "section": "🥳 Release |版本发布"},
+        { "type": "depoly",    "section": "🏄 Deploy | 部署", "hidden":true },
+        { "type": "ci",        "section": "👷 Continuous Integration | CI 配置" },
+        { "type": "docs",      "section": "📖 Documentation | 文档" },
+        { "type": "test",      "section": "✅ Tests | 测试" },
+        { "type": "chore",     "section": "🚀 Chore | 构建/工程依赖/工具" },
+        { "type": "style",     "section": "🦄 Styles | 风格" },
+        { "type": "revert",    "section": "⏪ Revert | 回退", "hidden": true },
+        { "type": "depend",    "section": "🧵 Dependency | 依赖调整" },
+        { "type": "perf",      "section": "⚡ Performance Improvements | 性能优化" },
+        { "type": "build",     "section": "📦‍ Build System | 打包构建" },
+    ]
+  }
 EOF
 touch .npmrc .nvmrc
 mkdir -p packages
