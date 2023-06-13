@@ -18,7 +18,7 @@ packages:
 EOF
 #实现commit约束(支持自定义)
 pnpm add commitizen cz-conventional-changelog commitlint-config-cz cz-customizable @commitlint/{config-conventional,cli} -w -D
-pnpm add standard-version json husky  lint-staged -w -D
+pnpm add standard-version json husky  lint-staged fast-glob -w -D
 pnpm exec json -I -f package.json -e 'this.private = true'
 pnpm exec json -I -f package.json -e 'this.scripts["prepare"] = "husky install"'
 pnpm exec json -I -f package.json -e 'this.scripts["release"] = "standard-version"'
@@ -153,7 +153,22 @@ commitlint.config.js
 EOF
 
 cat > .versionrc.js <<EOF
+const fg = require('fast-glob')
+const paths = fg.sync("*", {
+    cwd: "./packages",
+    onlyDirectories: true
+}).map(path => ({
+    filename: `packages/${path}/package.json`,
+    type: 'json'
+}))
 module.exports = {
+    "bumpFiles": [
+        {
+            filename: "package.json",
+            type: "json"
+        },
+        ...paths,
+    ],
     "types": [
         { "type": "init",      "section": "😶‍🌫️ Init | 初始化" },
         { "type": "feat",      "section": "✨ Features | 新功能" },
@@ -171,7 +186,7 @@ module.exports = {
         { "type": "perf",      "section": "⚡ Performance Improvements | 性能优化" },
         { "type": "build",     "section": "📦‍ Build System | 打包构建" },
     ]
-  }
+}
 EOF
 touch .npmrc .nvmrc
 mkdir -p packages
